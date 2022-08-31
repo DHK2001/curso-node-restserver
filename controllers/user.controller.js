@@ -3,14 +3,20 @@ const Usuario = require('../models/usuarios')
 const bcrypt = require('bcryptjs'); //npm i bcryptjs - paquete para encriptar.
 
 
-const usuaiosGet = (req = request, res = response) => {
+const usuaiosGet = async(req = request, res = response) => {
 
-    const {q, nombre = "No name"} = req.query;//query pàrams
+    const {limite = 5, desde = 0} = req.query;
+
+    const [total, usuarios] = await Promise.all([
+        Usuario.countDocuments({estado: true}),//no cuenta al que tiene estado false
+        Usuario.find({estado: true})//condicion para que no tome en cuenta al que tiene el estado en false.
+            .skip(parseInt(desde))
+            .limit(parseInt(limite))
+    ])
 
     res.json({
-        msg: 'get API - controlador',
-        q,
-        nombre
+        total,
+        usuarios
     })
 }
 
@@ -27,10 +33,7 @@ const usuaiosPut =async(req, res) => {
 
     const usuario = await Usuario.findByIdAndUpdate(id, resto);
 
-    res.json({
-        msg: 'put API - controlador',
-        usuario
-    })
+    res.json(usuario)
 }
 
 const usuaiosPost = async(req, res) => {
@@ -47,20 +50,20 @@ const usuaiosPost = async(req, res) => {
     await usuario.save();
 
     res.json({
-        msg: 'post API - controlador',
+        
         usuario
     })
 }
 
 const usuaiosDelete = (req, res) => {
     res.json({
-        msg: 'delete API - controlador'
+        
     })
 }
 
 const usuaiosPatch = (req, res) => {
     res.json({
-        msg: 'patch API - controlador'
+        
     })
 }
 
